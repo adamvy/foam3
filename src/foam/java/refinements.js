@@ -2674,3 +2674,125 @@ foam.CLASS({
     }
   ]
 });
+
+foam.SCRIPT({
+  name: 'SetModelFlagsForJava',
+  code: function() {
+    foam.core.Model.model_.flags = ['java'];
+  }
+});
+
+foam.CLASS({
+  package: 'foam.java',
+  name: 'JavaModelModelRefinements',
+  documentation: 'Upgrade foam.core.Model to a more complete model so we can generate it to java',
+  refines: 'foam.core.Model',
+  properties: [
+    {
+      class: 'String',
+      name: 'id',
+      hidden: true,
+      transient: true,
+      getter: function() {
+        return this.package ? this.package + '.' + this.name : this.name;
+      },
+      javaGetter: `return getPackage().equals("") ? getName() : getPackage() + "." + getName();`
+    },
+    {
+      class: 'String',
+      name: 'package',
+      factory: function() {
+        if ( this.refines ) {
+          var i = this.refines.lastIndexOf('.');
+          return i == -1 ? '' : this.refines.substring(0, i);
+        }
+        return '';
+      }
+    },
+    {
+      class: 'Boolean',
+      name: 'abstract',
+      value: false,
+    },
+    {
+      class: 'String',
+      name: 'name',
+      factory: function() {
+        if ( this.refines ) {
+          var i = this.refines.lastIndexOf('.');
+          return i == -1 ? this.refines : this.refines.substring(i+1);
+        }
+        return '';
+      }
+    },
+    {
+      class: 'StringArray',
+      name: 'flags',
+      documentation: `
+        When set, marks the model with the given flags. This can be used for
+        things like stripping out platform specific models when building.
+      `
+    },
+    {
+      class: 'String',
+      name: 'label',
+      expression: function(name, id) {
+        return foam.String.labelize(name_);
+      }
+    },
+    {
+      class: 'String',
+      name: 'extends',
+      value: 'FObject'
+    },
+    {
+      class: 'String',
+      name: 'refines',
+    },
+    {
+      class: 'String',
+      name: 'javaExtends'
+    },
+    {
+      class: 'Int',
+      name: "order",
+      hidden: true,
+      transient: true
+    },
+    {
+      class: 'String',
+      name: 'documentation',
+      adapt: function (_, d) {
+        return typeof d === 'function' ? foam.String.multiline(d).trim() : d;
+      }
+    },
+    {
+      class: 'AxiomArray',
+      // List of extra axioms. Is added to axioms_.
+      name: 'axioms',
+      factory: function() { return []; },
+      postSet: function(_, a) { this.axioms_.push.apply(this.axioms_, a); },
+      adapt: function(_, v) {
+        if ( ! Array.isArray(v) ) return v;
+        var copy;
+        for ( var i = 0 ; i < v.length ; i++ ) {
+          if ( v[i].class ) {
+            if ( ! copy ) copy = v.slice();
+            copy[i] = foam.lookup(v[i].class).create(v[i]);
+          }
+        }
+        return copy || v;
+      }
+    },
+    {
+      // Is upgraded to an AxiomArray later.
+      of: 'Property',
+      name: 'properties'
+    },
+    {
+      // Is upgraded to an AxiomArray later.
+      of: 'Method',
+      name: 'methods'
+    }
+  ]
+})

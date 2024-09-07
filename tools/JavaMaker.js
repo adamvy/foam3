@@ -31,6 +31,10 @@ exports.init = function() {
 
 
 exports.end = function() {
+  // Promote Model model
+  foam.USED['foam.core.Model'] = foam.core.Model
+  foam.core.Model.model_.flags = ['java'];
+
   // Promote all UNUSED Models to USED
   // 2 passes in case interfaces generated new classes in 1st pass
   for ( var i = 0 ; i < 2 ; i++ )
