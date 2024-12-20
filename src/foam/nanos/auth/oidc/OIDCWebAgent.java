@@ -39,6 +39,7 @@ public class OIDCWebAgent implements WebAgent {
                 return;
             }
 
+            logger.log("requesting token: " + req.getRequestURL().toString());
             // Exchange authorization code for tokens
             String token = provider.getTokenForCode(x, code, req.getRequestURL().toString());
             if (token == null) {
