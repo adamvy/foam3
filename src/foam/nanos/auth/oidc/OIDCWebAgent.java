@@ -27,7 +27,7 @@ public class OIDCWebAgent implements WebAgent {
         this.redirectURI = redirectURI;
     }
 
-    private String redirectURI = null
+    private String redirectURI = null;
 
     @Override
     public void execute(X x) {
