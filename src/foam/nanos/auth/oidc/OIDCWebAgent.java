@@ -22,6 +22,13 @@ import foam.nanos.auth.oidc.OIDCLoginState;
 // The openid identity provider (ex Google/Apple) will redirect the user to this
 // web agent after successfully authenticating the user.
 public class OIDCWebAgent implements WebAgent {
+    public OIDCWebAgent() {}
+    public OIDCWebAgent(String redirectURI) {
+        this.redirectURI = redirectURI;
+    }
+
+    private String redirectURI = null
+
     @Override
     public void execute(X x) {
         Logger logger = (Logger) x.get("logger");
@@ -39,21 +46,8 @@ public class OIDCWebAgent implements WebAgent {
                 return;
             }
 
-            String scheme = request.getHeader("X-Forwarded-Proto");
-            if (scheme == null) {
-                scheme = request.getScheme();
-            }
-            StringBuilder url = new StringBuilder();
-            url.append(scheme).append("://")
-                    .append(request.getServerName())
-                    .append(request.getServerPort() == 80 || request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-                    .append(request.getRequestURI());
-            if (request.getQueryString() != null) {
-                url.append("?").append(request.getQueryString());
-            }
-
             // Exchange authorization code for tokens
-            String token = provider.getTokenForCode(x, code, url.toString());
+            String token = provider.getTokenForCode(x, code, redirectURI != null ? redirectURI : req.getRequestURL().toString());
             if (token == null) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 resp.getWriter().write("Failed to obtain tokens");
