@@ -61,7 +61,7 @@ foam.CLASS({
     
                 if (conn.getResponseCode() != 200) {
                     logger.error("Failed to obtain tokens, HTTP response code: " + conn.getResponseCode());
-                    try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream()))) {
+                    try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getErrorStream()))) {
                        logger.error("response was" + org.apache.commons.io.IOUtils.toString(in));
                     }
 
