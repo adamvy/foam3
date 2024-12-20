@@ -329,14 +329,9 @@ foam.CLASS({
     // TODO: I don't think the memoize0 is needed since registerClassFactory already does that
     var f = foam.Function.memoize0(function() {
       delete foam.UNUSED[m.id];
-      try {
-        var c = CLASS(m);
-        foam.USED[m.id] = m;
-        return c;
-      } catch(x) {
-        console.log('ERROR: Class definition error in', m.id, x);
-        throw x;
-      }
+      var c = CLASS(m);
+      foam.USED[m.id] = m;
+      return c;
     });
 
     foam.__context__.registerFactory(m, f);
