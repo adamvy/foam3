@@ -39,9 +39,21 @@ public class OIDCWebAgent implements WebAgent {
                 return;
             }
 
-            logger.log("requesting token: " + req.getRequestURL().toString());
+            String scheme = request.getHeader("X-Forwarded-Proto");
+            if (scheme == null) {
+                scheme = request.getScheme();
+            }
+            StringBuilder url = new StringBuilder();
+            url.append(scheme).append("://")
+                    .append(request.getServerName())
+                    .append(request.getServerPort() == 80 || request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+                    .append(request.getRequestURI());
+            if (request.getQueryString() != null) {
+                url.append("?").append(request.getQueryString());
+            }
+
             // Exchange authorization code for tokens
-            String token = provider.getTokenForCode(x, code, req.getRequestURL().toString());
+            String token = provider.getTokenForCode(x, code, url.toString());
             if (token == null) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 resp.getWriter().write("Failed to obtain tokens");
