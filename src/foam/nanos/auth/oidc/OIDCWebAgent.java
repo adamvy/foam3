@@ -46,6 +46,7 @@ public class OIDCWebAgent implements WebAgent {
                 return;
             }
 
+            logger.info("redirect is" + redirectURI.toString());
             // Exchange authorization code for tokens
             String token = provider.getTokenForCode(x, code, redirectURI != null ? redirectURI : req.getRequestURL().toString());
             if (token == null) {
